@@ -38,7 +38,7 @@ Static website for circuitEvolve. Plain HTML, CSS and JavaScript with no build s
 
 `sitemap.xml`, `robots.txt` and canonical/Open Graph tags currently use `https://sathvik-bharadwaj.github.io/circuitevolve-website/`. Update this base URL if you publish under another address.
 
-This repository is private. GitHub Pages hosting from a private repository requires a plan that supports it. The site can also be deployed unchanged to another static host.
+This repository is public and is configured for GitHub Pages from the `main` branch root. The live website is https://sathvik-bharadwaj.github.io/circuitevolve-website/.
 
 ## Preview locally
 
