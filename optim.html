@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPTIM · circuitEvolve</title>
+<meta name="description" content="OPTIM, the simulation-driven optimization engine for analog circuits: automated sizing, multi-corner verification, Monte Carlo and yield.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://sathvik-bharadwaj.github.io/circuitevolve-website/optim.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OPTIM · circuitEvolve">
+<meta property="og:description" content="OPTIM, the simulation-driven optimization engine for analog circuits: automated sizing, multi-corner verification, Monte Carlo and yield.">
+<meta property="og:url" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/optim.html">
+<meta property="og:image" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="preload" href="assets/jakarta.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="css/site.css">
+<script src="js/ce-sims.js" defer></script>
+
+<script src="js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+  <nav class="navlinks" id="navlinks" aria-label="Main"><a href="optim.html" aria-current="page">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Thesis</a><a class="m-only" href="contact.html">Contact</a><a class="m-only" href="demo.html">Try OPTIM ↗</a></nav>
+  <div class="nav-cta"><a class="btn ghost sm" href="contact.html">Contact</a><a class="btn sm" href="demo.html">Try OPTIM <span class="arr">↗</span></a></div>
+  <button class="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span></span></button>
+</div></header>
+<main id="main">
+<section class="phero">
+  <div class="wrap">
+    <span class="eyebrow rise">OPTIM · the engine</span>
+    <h1 class="rise" style="--d:.1s">An optimization loop that <span class="grad">mutates, verifies and converges.</span></h1>
+    <p class="rise" style="--d:.2s">OPTIM is circuitEvolve's core engine. It iterates circuit parameters through your own simulations until a design meets its specification at every corner, benchmarked against real device libraries.</p>
+    <div class="actions rise" style="--d:.3s"><a class="btn" href="demo.html">Try OPTIM <span class="arr">↗</span></a><a class="btn ghost" href="how-it-works.html">How it works <span class="arr">↗</span></a></div>
+  </div>
+</section>
+
+<section class="sec tight">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><strong data-count="1000">1000<sup>+</sup></strong><div class="meter" style="--v:.92"><i></i></div><span>devices in library coverage</span></div>
+      <div class="stat"><strong data-count="200">200<sup>+</sup></strong><div class="meter" style="--v:.72"><i></i></div><span>PVT corners verified</span></div>
+      <div class="stat"><strong data-count="12.4">12.4<sup>×</sup></strong><div class="meter" style="--v:.62"><i></i></div><span>faster convergence</span></div>
+      <div class="stat"><strong data-count="20">20<sup>%</sup></strong><div class="meter" style="--v:.24"><i></i></div><span>less time to tapeout</span></div>
+    </div>
+    <p class="fine">Reported benchmark figures from circuitEvolve. Performance varies with circuit, constraints and setup.</p>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="head">
+      <div data-reveal><span class="eyebrow"><span class="n">01</span> Inside the loop</span><h2>A result you can reason about.</h2></div>
+      <p data-reveal style="--d:.08s">Trace the search from baseline to candidate. Follow the ancestry, compare trade-offs, and inspect every measured outcome before anything touches your schematic.</p>
+    </div>
+    <div class="frame" data-reveal>
+      <div class="frame-bar"><span>OPTIM / EXPLORATION DASHBOARD</span><span class="live"></span><span>LIVE</span></div>
+      <div class="tabs" role="tablist" aria-label="Analysis view">
+        <button type="button" role="tab" aria-selected="true" data-chart="lineage">Lineage</button>
+        <button type="button" role="tab" aria-selected="false" tabindex="-1" data-chart="pareto">Pareto</button>
+        <button type="button" role="tab" aria-selected="false" tabindex="-1" data-chart="spider">Spider</button>
+      </div>
+      <div class="tabbody">
+        <div id="chart-lineage" role="tabpanel"><div class="sim" data-ce-sim="lineage" data-seed="11" data-speed=".85"></div></div>
+        <div id="chart-pareto" role="tabpanel" hidden><div class="sim" data-ce-sim="pareto" data-seed="4" data-speed=".85"></div></div>
+        <div id="chart-spider" role="tabpanel" hidden><div class="sim" data-ce-sim="spider" data-seed="9" data-speed=".85"></div></div>
+      </div>
+    </div>
+    <div class="caption"><span>Hover to inspect. Click a lineage node to pin its ancestry.</span><a class="tlink" href="demo.html">Set your own targets ↗</a></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="head">
+      <div data-reveal><span class="eyebrow"><span class="n">02</span> Capabilities</span><h2>Built for analog teams.</h2></div>
+      <p data-reveal style="--d:.08s">Works alongside your simulator, PDK and EDA environment, with no proprietary training data required.</p>
+    </div>
+    <div class="grid4">
+      <div class="card" data-reveal><span class="ico">⟲</span><h3>Automated sizing</h3><p>Multi-generation sweeps that converge device widths, lengths, biases and compensation.</p></div>
+      <div class="card" data-reveal style="--d:.06s"><span class="ico">⇄</span><h3>Tool-agnostic</h3><p>Works across your PDK and simulator, and helps port circuits between technology nodes.</p></div>
+      <div class="card" data-reveal style="--d:.12s"><span class="ico">∅</span><h3>Training-free</h3><p>No proprietary datasets or pretraining needed before the first run.</p></div>
+      <div class="card" data-reveal style="--d:.18s"><span class="ico">σ</span><h3>Monte Carlo &amp; yield</h3><p>High-volume mismatch tests so the typical case is never the only case.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap split">
+    <div class="stack" data-reveal>
+      <span class="eyebrow"><span class="n">03</span> The product in motion</span>
+      <h2>Your workspace. Accelerated.</h2>
+      <p>The circuitEvolve product walkthrough: the schematic you already have, explored at the speed of computation.</p>
+      <a class="tlink" href="demo.html">Try the interactive workflow ↗</a>
+    </div>
+    <div class="device" data-reveal style="--d:.08s">
+      <div class="frame-bar"><span>circuitEvolve / product walkthrough</span><button class="vbtn" type="button">Play</button></div>
+      <video src="assets/original-demo.mp4" muted loop playsinline preload="metadata" aria-label="circuitEvolve product walkthrough animation"></video>
+    </div>
+  </div>
+</section>
+
+<section class="sec tight"><div class="wrap"><div class="cta" data-reveal>
+  <span class="eyebrow">Next</span><h2>See every corner it checks.</h2><p>How OPTIM verifies each candidate across process, temperature and supply before it reaches you.</p>
+  <div class="actions"><a class="btn" href="verification.html">Verification <span class="arr">↗</span></a><a class="btn ghost" href="contact.html">Request a demo <span class="arr">↗</span></a></div>
+</div></div></section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+        <p>AI for analog circuit design. Simulation-driven exploration, engineer-led decisions.</p>
+      </div>
+      <nav class="footer-col" aria-label="Platform"><h4>Platform</h4><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a href="demo.html">Interactive demo</a></nav>
+      <nav class="footer-col" aria-label="Company"><h4>Company</h4><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Our thesis</a><a href="contact.html">Contact</a></nav>
+    </div>
+    <div class="footer-bot">
+      <span>© <span data-year>2026</span> circuitEvolve</span>
+      <span class="footer-links"><a href="mailto:hello@circuitevolve.com">hello@circuitevolve.com</a><a href="https://www.linkedin.com/company/circuitevolve/" target="_blank" rel="noopener">LinkedIn ↗</a><a href="#main">Back to top ↑</a></span>
+    </div>
+  </div>
+</footer>
+<button class="motion-toggle" type="button" aria-pressed="false">Pause motion <span aria-hidden="true">Ⅱ</span></button>
+</body>
+</html>

@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Try OPTIM by circuitEvolve: set your own targets on a sample circuit and watch it converge.">
+<title>Try OPTIM · circuitEvolve</title>
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="canonical" href="https://sathvik-bharadwaj.github.io/circuitevolve-website/demo.html">
+<meta name="claude:viewport-fit-sides" content="cover">
+
+
+
+<style>
+/* Layout: circuitevolve.com paper/ink. A short intro, then one desktop-app window whose tabs are
+   the four steps from the user guide: Circuit → Targets → Changes & corners → Run & review. */
+:root {
+  --paper: #F5F3EE; --ink: #141712; --muted: rgba(6,6,6,.64); --dim: rgba(6,6,6,.42);
+  --line: rgba(6,6,6,.1); --line-strong: rgba(6,6,6,.2); --raise: #fbfaf7; --sunk: #ecebe5; --chrome: #edebe5;
+  --pass: #416B42; --fail: #8A8A8A; --warn: #8B7750; --info: #667B7A;
+  --shadow: 0 40px 90px -50px rgba(0,0,0,.35), 0 10px 30px -18px rgba(0,0,0,.16);
+  --sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0f0f0e; --ink: #efede7; --muted: rgba(239,237,231,.66); --dim: rgba(239,237,231,.44);
+  --line: rgba(239,237,231,.1); --line-strong: rgba(239,237,231,.22); --raise: #161615; --sunk: #1b1b1a; --chrome: #171716;
+  --pass: #10b981; --fail: #f04438; --warn: #f59e0b; --info: #5b9bff;
+  --shadow: 0 40px 90px -50px rgba(0,0,0,.9), 0 10px 30px -18px rgba(0,0,0,.6); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #0f0f0e; --ink: #efede7; --muted: rgba(239,237,231,.66); --dim: rgba(239,237,231,.44);
+  --line: rgba(239,237,231,.1); --line-strong: rgba(239,237,231,.22); --raise: #161615; --sunk: #1b1b1a; --chrome: #171716;
+  --pass: #10b981; --fail: #f04438; --warn: #f59e0b; --info: #5b9bff;
+  --shadow: 0 40px 90px -50px rgba(0,0,0,.9), 0 10px 30px -18px rgba(0,0,0,.6); color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; font-feature-settings: "ss01","ss02"; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 500 11px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.mono { font-family: var(--mono); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; border-bottom: 1px solid var(--line); }
+.bar b { font-size: 17px; letter-spacing: -.02em; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 10px 18px; background: var(--ink); color: var(--paper); font-weight: 600; font-size: 13.5px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-strong); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pass); }
+
+.intro { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 40px; align-items: end; padding-block: 56px 36px; }
+.intro h1 { margin: 10px 0 0; font-size: clamp(36px, 5.6vw, 64px); line-height: 1.02; letter-spacing: -.045em; font-weight: 700; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); font-weight: 300; font-size: 16.5px; line-height: 1.75; max-width: 56ch; }
+.facts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.facts span { font: 500 11.5px var(--mono); color: var(--muted); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 11px; }
+
+/* app window */
+.app { border: 1px solid var(--line-strong); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); background: var(--paper); }
+.chrome { display: flex; align-items: center; gap: 18px; padding: 0 14px; height: 44px; background: var(--chrome); border-bottom: 1px solid var(--line); }
+.lights { display: flex; gap: 7px; flex: none; }
+.lights i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+.title { flex: 1; text-align: center; font-weight: 650; font-size: 13.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title small { font: 500 11px var(--mono); color: var(--dim); margin-left: 8px; }
+.pill { font: 600 10px var(--mono); letter-spacing: .1em; border-radius: 999px; padding: 4px 10px 4px 20px; position: relative; flex: none; color: var(--dim); background: var(--sunk); }
+.pill::before { content: ""; position: absolute; left: 9px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: currentColor; }
+.pill.run { color: var(--pass); background: color-mix(in srgb, var(--pass) 12%, transparent); }
+.pill.run::before { animation: blink 1s infinite; }
+.pill.done { color: var(--pass); background: color-mix(in srgb, var(--pass) 12%, transparent); }
+.pill.part { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+@keyframes blink { 50% { opacity: .25; } }
+
+.tabs { display: flex; gap: 2px; padding: 0 14px; border-bottom: 1px solid var(--line); overflow-x: auto; background: var(--paper); }
+.tab { border: 0; background: none; padding: 14px 12px 12px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; display: flex; gap: 8px; align-items: center; }
+.tab .n { font: 600 10.5px var(--mono); width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line-strong); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tab[aria-selected="true"] .n { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tab.ok .n { background: color-mix(in srgb, var(--pass) 14%, transparent); color: var(--pass); border-color: transparent; }
+.tab:disabled { cursor: not-allowed; opacity: .55; }
+
+.pane { padding: 28px; display: grid; gap: 24px; }
+.pane[hidden] { display: none !important; }
+.pane-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; flex-wrap: wrap; }
+.pane-head h2 { margin: 6px 0 0; font-size: 24px; letter-spacing: -.03em; font-weight: 650; }
+.pane-head p { margin: 6px 0 0; color: var(--muted); font-weight: 300; font-size: 14.5px; line-height: 1.65; max-width: 70ch; }
+.foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+.err { color: var(--fail); font-size: 13px; min-height: 1em; }
+
+/* step 1 */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.card { text-align: left; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--raise); padding: 16px; cursor: pointer; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.card svg { width: 100%; height: 112px; border-radius: 8px; background: #000000; display: block; }
+.card h3 { margin: 0; font-size: 16px; letter-spacing: -.02em; font-weight: 650; }
+.card p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.6; font-weight: 300; }
+.card .meta { font: 500 11px var(--mono); color: var(--dim); }
+.card.locked { cursor: default; background: transparent; border-style: dashed; }
+.card.locked .lock { height: 112px; border-radius: 8px; border: 1px dashed var(--line-strong); display: grid; place-items: center; text-align: center; color: var(--dim); font: 500 11.5px/1.6 var(--mono); padding: 12px; }
+
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font: 500 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); padding: 11px 12px; border-bottom: 1px solid var(--line-strong); background: var(--raise); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .unit { color: var(--dim); font-size: 12px; margin-left: 4px; }
+tr.off td:not(:first-child) { opacity: .42; }
+.mname { font-weight: 600; white-space: nowrap; }
+.mname small { display: block; font: 400 11px var(--mono); color: var(--dim); }
+input[type="number"], select { background: var(--paper); border: 1px solid var(--line-strong); border-radius: 7px; padding: 6px 8px; font-size: 13px; font-family: var(--mono); min-width: 0; }
+input[type="number"] { width: 92px; }
+input[type="number"].bad { border-color: var(--fail); box-shadow: 0 0 0 2px color-mix(in srgb, var(--fail) 18%, transparent); }
+select { padding-right: 4px; }
+.goal { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.goal span { color: var(--dim); font-family: var(--mono); font-size: 12.5px; }
+input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--ink); }
+
+/* step 3 */
+.split { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px; align-items: start; }
+.block { display: grid; gap: 12px; min-width: 0; }
+.block h3 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chips .lab { font: 500 11px var(--mono); color: var(--dim); width: 64px; }
+.chip { border: 1px solid var(--line-strong); background: transparent; border-radius: 999px; padding: 6px 12px; font: 600 12px var(--mono); cursor: pointer; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.panel { border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 14px; background: var(--raise); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: none; border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+input[type="range"] { width: 100%; accent-color: var(--ink); }
+.estimate { font: 500 12px/1.7 var(--mono); color: var(--muted); }
+.estimate b { color: var(--ink); }
+
+/* step 4 */
+.runbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.progress { flex: 1; min-width: 160px; height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s; }
+.gencount { font: 600 12px var(--mono); color: var(--muted); white-space: nowrap; }
+.rgrid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: start; }
+.box { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; background: var(--paper); }
+.box-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--raise); }
+.box-h .eyebrow { font-size: 10px; }
+.box-h .v { font: 600 11.5px var(--mono); color: var(--muted); }
+.chart { position: relative; height: 260px; }
+.chart canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.log { height: 196px; overflow: hidden; padding: 10px 14px; font: 500 11.5px/1.75 var(--mono); color: var(--muted); display: flex; flex-direction: column; justify-content: flex-end; }
+.log div { flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log .p { color: var(--pass); font-weight: 650; }
+.log .f { color: var(--fail); font-weight: 650; }
+.log .k { color: var(--ink); }
+.box table { font-size: 12.5px; }
+.box td, .box th { padding: 7px 12px; }
+.st { font: 650 10.5px var(--mono); letter-spacing: .06em; border-radius: 999px; padding: 3px 8px; white-space: nowrap; }
+.st.p { color: var(--pass); background: color-mix(in srgb, var(--pass) 12%, transparent); }
+.st.f { color: var(--fail); background: color-mix(in srgb, var(--fail) 10%, transparent); }
+.delta { font: 500 11px var(--mono); color: var(--dim); }
+.delta.up { color: var(--info); }
+.flash { animation: flash .7s ease-out; }
+@keyframes flash { from { background: color-mix(in srgb, var(--warn) 22%, transparent); } }
+.heat-wrap { overflow-x: auto; padding: 12px 14px 14px; }
+.heat { display: grid; gap: 3px; align-items: center; }
+.heat .rl { font: 500 11px var(--mono); color: var(--muted); padding-right: 8px; white-space: nowrap; }
+.heat .cl { font: 600 10px var(--mono); color: var(--dim); text-align: center; text-transform: uppercase; }
+.heat .c { height: 22px; border-radius: 4px; min-width: 14px; transition: background-color .5s; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font: 500 11px var(--mono); color: var(--dim); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+
+.review { border: 1px solid var(--line-strong); border-radius: 12px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 28px; align-items: center; background: var(--raise); }
+.review[hidden] { display: none !important; }
+.review h3 { margin: 4px 0 6px; font-size: 26px; letter-spacing: -.035em; font-weight: 700; }
+.review p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.65; font-weight: 300; max-width: 72ch; }
+.review .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.stats div { background: var(--paper); padding: 12px 14px; display: grid; gap: 2px; }
+.stats b { font-size: 22px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.stats span { font: 500 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.locknote { font: 500 11.5px var(--mono); color: var(--dim); }
+
+.note { margin-top: 40px; padding-block: 24px 48px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.note p { margin: 0; color: var(--dim); font-size: 12.5px; line-height: 1.7; max-width: 80ch; }
+
+@media (max-width: 900px) {
+  .intro, .split, .rgrid { grid-template-columns: minmax(0, 1fr); }
+  .intro { gap: 16px; padding-block: 40px 28px; }
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .pane { padding: 18px 14px; }
+  .review { grid-template-columns: minmax(0, 1fr); }
+  .review .acts { justify-content: flex-start; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chrome .tabsx { display: none; }
+}
+@media (max-width: 560px) { .hide-sm { display: none; } .box .mname { white-space: normal; } .box table { font-size: 12px; } .box td, .box th { padding: 7px 8px; } }
+@media (prefers-reduced-motion: reduce) { .pill.run::before, .flash { animation: none; } .progress i, .heat .c { transition: none; } }
+</style>
+
+<link rel="stylesheet" href="css/demo-theme.css"></head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a href="index.html" class="demo-brand"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+    <nav class="demo-links" aria-label="Site"><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a class="btn ghost" href="contact.html">Request the full demo</a></nav>
+  </header>
+
+  <section class="intro">
+    <div>
+      <span class="eyebrow">OPTIM · interactive demo</span>
+      <h1>Set your targets. Watch OPTIM converge.</h1>
+    </div>
+    <div>
+      <p>Pick a sample testbench, write the specification you would hand a designer, choose what OPTIM may change and which corners it must pass. Then run it and review the result, the same way you would in the desktop app.</p>
+      <div class="facts"><span>Runs in your browser</span><span>Your own goals</span><span>Up to 45 PVT corners</span></div>
+    </div>
+  </section>
+
+  <div class="app" id="app">
+    <div class="chrome">
+      <div class="lights"><i style="background:#8A8A8A"></i><i style="background:#BDBDBD"></i><i style="background:#3D7BFF"></i></div>
+      <div class="title">Optim <small id="benchName">demo/ota_two_stage_tb</small></div>
+      <span class="pill" id="pill">SETUP</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Demo steps">
+      <button class="tab" role="tab" id="tab1" aria-selected="true" data-step="1"><span class="n">1</span>Circuit</button>
+      <button class="tab" role="tab" id="tab2" aria-selected="false" data-step="2"><span class="n">2</span>Targets</button>
+      <button class="tab" role="tab" id="tab3" aria-selected="false" data-step="3"><span class="n">3</span>Changes &amp; corners</button>
+      <button class="tab" role="tab" id="tab4" aria-selected="false" data-step="4" disabled><span class="n">4</span>Run &amp; review</button>
+    </div>
+
+    <!-- step 1 -->
+    <section class="pane" id="pane1" role="tabpanel" aria-labelledby="tab1">
+      <div class="pane-head">
+        <div><span class="eyebrow">Step 1 · Prepare the circuit</span><h2>Choose a baseline testbench</h2>
+        <p>In the product you load a completed Cadence simulation. Here, pick one of two sample circuits; its baseline is measured at the typical corner below.</p></div>
+      </div>
+      <div class="cards" id="cards"></div>
+      <div class="block">
+        <div class="row"><h3>Extracted baseline</h3><span class="locknote" id="baseCorner">tt · 27°C · 1.80V</span></div>
+        <div class="tbl"><table><thead><tr><th>Metric</th><th class="num">Baseline value</th><th>Unit</th></tr></thead><tbody id="baseBody"></tbody></table></div>
+      </div>
+      <div class="foot"><span class="locknote">Two sample circuits · your own Cadence testbench in the full product</span><button class="btn" data-go="2">Set targets →</button></div>
+    </section>
+
+    <!-- step 2 -->
+    <section class="pane" id="pane2" role="tabpanel" aria-labelledby="tab2" hidden>
+      <div class="pane-head">
+        <div><span class="eyebrow">Step 2 · Set the targets</span><h2>Write your specification</h2>
+        <p>Include the metrics you care about, pick a goal rule and enter its numbers in the metric's own units. Priority sets relative importance. Every included goal must hold at every corner you select next.</p></div>
+        <button class="btn ghost" id="resetTargets" type="button">Reset to suggested</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Include</th><th>Metric</th><th class="num">Baseline</th><th>Goal</th><th>Goal details</th><th>Priority</th></tr></thead>
+        <tbody id="tgtBody"></tbody>
+      </table></div>
+      <div class="foot"><span class="err" id="err2"></span><div class="row"><button class="btn ghost" data-go="1">← Circuit</button><button class="btn" data-go="3">Choose changes →</button></div></div>
+    </section>
+
+    <!-- step 3 -->
+    <section class="pane" id="pane3" role="tabpanel" aria-labelledby="tab3" hidden>
+      <div class="pane-head">
+        <div><span class="eyebrow">Step 3 · Choose allowed changes</span><h2>What may change, and where it must work</h2>
+        <p>Tick the values OPTIM may change and bound each one. Fixed values stay at baseline. Then choose the process, temperature and supply corners every candidate is verified against.</p></div>
+      </div>
+      <div class="split">
+        <div class="block">
+          <h3>Circuit values</h3>
+          <div class="tbl"><table>
+            <thead><tr><th>May change</th><th>Value</th><th class="num">Baseline</th><th>Lower</th><th>Upper</th></tr></thead>
+            <tbody id="parBody"></tbody>
+          </table></div>
+        </div>
+        <div class="block">
+          <h3>Test conditions</h3>
+          <div class="panel">
+            <div class="chips" id="cProc"><span class="lab">Process</span></div>
+            <div class="chips" id="cTemp"><span class="lab">Temp</span></div>
+            <div class="chips" id="cVdd"><span class="lab">Supply</span></div>
+            <div class="row"><span class="locknote" id="cornerCount">9 corners</span></div>
+          </div>
+          <h3>Run settings</h3>
+          <div class="panel">
+            <div class="row"><label for="gens">Generations</label><span class="mono" id="gensVal">20</span></div>
+            <input type="range" id="gens" min="6" max="40" step="1" value="20">
+            <div class="row"><span>Search effort</span>
+              <div class="seg" id="effort"><button type="button" data-v="quick">Quick</button><button type="button" data-v="balanced" aria-pressed="true">Balanced</button><button type="button" data-v="thorough">Thorough</button></div>
+            </div>
+            <div class="estimate" id="estimate"></div>
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="err" id="err3"></span><div class="row"><button class="btn ghost" data-go="2">← Targets</button><button class="btn" id="startBtn" type="button"><span class="dot"></span>Start run</button></div></div>
+    </section>
+
+    <!-- step 4 -->
+    <section class="pane" id="pane4" role="tabpanel" aria-labelledby="tab4" hidden>
+      <div class="review" id="review" hidden></div>
+      <div class="runbar">
+        <span class="gencount" id="genCount">gen 00 / 20</span>
+        <div class="progress"><i id="prog"></i></div>
+        <button class="btn ghost" id="stopBtn" type="button">Stop</button>
+      </div>
+      <div class="rgrid">
+        <div class="block">
+          <div class="box"><div class="box-h"><span class="eyebrow">Combined score · every candidate</span><span class="v" id="bestScore">best —</span></div><div class="chart"><canvas id="chart" aria-label="Combined score of every candidate by generation" role="img"></canvas></div></div>
+          <div class="box"><div class="box-h"><span class="eyebrow">Evolution log</span><span class="v" id="evals">0 simulations</span></div><div class="log" id="log" aria-live="polite"></div></div>
+        </div>
+        <div class="block">
+          <div class="box"><div class="box-h"><span class="eyebrow">Targets · worst corner</span><span class="v" id="passCount">0 / 0 passing</span></div>
+            <div style="overflow-x:auto"><table><thead><tr><th>Metric</th><th class="hide-sm">Goal</th><th class="num">Baseline</th><th class="num">Best</th><th></th></tr></thead><tbody id="liveT"></tbody></table></div></div>
+          <div class="box"><div class="box-h"><span class="eyebrow">Circuit changes · best candidate</span><span class="v" id="chgCount">0 changed</span></div>
+            <div style="overflow-x:auto"><table><thead><tr><th>Value</th><th class="num hide-sm">Baseline</th><th class="num">Best</th><th class="num">Δ</th></tr></thead><tbody id="liveP"></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="box"><div class="box-h"><span class="eyebrow">Corner heatmap · best candidate</span><div class="legend"><span><i style="background:var(--fail)"></i>fails</span><span><i style="background:color-mix(in srgb,var(--pass) 35%,var(--paper))"></i>passes</span><span><i style="background:var(--pass)"></i>passes with margin</span></div></div><div class="heat-wrap"><div class="heat" id="heat"></div></div></div>
+    </section>
+  </div>
+
+  <footer class="note">
+    <p>This demo runs simplified textbook models of two circuits and a basic search, entirely in your browser. It shows the OPTIM workflow, not the patented OPTIM engine: its method, speed and results on real PDKs and your own Cadence testbenches are shown in the full demo.</p>
+    <p class="mono">hello@circuitevolve.com</p>
+  </footer>
+</div>
+
+<script>
+/* OPTIM demo engine — simplified analytical circuit models + a generic search.
+   Runs entirely in the visitor's browser. Not the production engine. */
+var DemoEngine = (function () {
+  'use strict';
+  var PI2 = Math.PI * 2, kB = 1.380649e-23;
+  var UN = 280e-6, UP = 70e-6, LAM = 0.08;           // µCox (A/V²), λ·L (µm/V)
+
+  /* ── corners ───────────────────────────────────────────── */
+  var PROC = { tt: [1, 1, 0], ff: [1.12, 1.12, -0.04], ss: [0.88, 0.88, 0.04], fs: [1.12, 0.88, 0], sf: [0.88, 1.12, 0] };
+  var TEMPS = { '-40': -40, '27': 27, '125': 125 };
+  var VDDS = { low: 0.9, nom: 1.0, high: 1.1 };
+  function corner(p, t, v, vddNom) {
+    var tk = TEMPS[t] + 273.15, tf = Math.pow(tk / 300.15, -1.3);
+    var pr = PROC[p];
+    return { name: p + ' · ' + t.replace('-', '−') + '°C · ' + (vddNom * VDDS[v]).toFixed(2) + 'V', p: p, t: t, v: v,
+      kn: pr[0] * tf, kp: pr[1] * tf, dvth: pr[2] - 0.0015 * (tk - 300.15), vdd: vddNom * VDDS[v], tk: tk };
+  }
+
+  /* ── two-stage Miller OTA ──────────────────────────────── */
+  var OTA = {
+    id: 'ota', name: 'Two-stage Miller OTA', bench: 'demo/ota_two_stage_tb', vdd: 1.8,
+    blurb: 'Differential pair with mirror load, common-source second stage, Miller compensation. 2 pF load.',
+    params: [
+      { k: 'W1', label: 'M1/M2 width', unit: 'µm', v: 6, min: 1, max: 100 },
+      { k: 'L1', label: 'M1–M4 length', unit: 'µm', v: 0.3, min: 0.18, max: 2 },
+      { k: 'W6', label: 'M6 width', unit: 'µm', v: 18, min: 2, max: 200 },
+      { k: 'L6', label: 'M6 length', unit: 'µm', v: 0.25, min: 0.18, max: 2 },
+      { k: 'Ib', label: 'Tail current', unit: 'µA', v: 12, min: 2, max: 200 },
+      { k: 'K7', label: '2nd-stage current ratio', unit: '×', v: 3, min: 1, max: 12 },
+      { k: 'Cc', label: 'Miller capacitor', unit: 'pF', v: 0.6, min: 0.2, max: 10 },
+    ],
+    metrics: [
+      { k: 'gain', label: 'DC gain', unit: 'dB', dec: 1, goal: 'ge', a: 70, on: true, pri: 'normal' },
+      { k: 'ugb', label: 'Unity-gain bandwidth', unit: 'MHz', dec: 1, goal: 'ge', a: 40, on: true, pri: 'normal' },
+      { k: 'pm', label: 'Phase margin', unit: '°', dec: 1, goal: 'range', a: 55, b: 75, on: true, pri: 'high' },
+      { k: 'power', label: 'Power', unit: 'µW', dec: 0, goal: 'le', a: 450, on: true, pri: 'normal' },
+      { k: 'slew', label: 'Slew rate', unit: 'V/µs', dec: 1, goal: 'ge', a: 20, on: true, pri: 'normal' },
+      { k: 'swing', label: 'Output swing', unit: 'V', dec: 2, goal: 'ge', a: 1.1, on: true, pri: 'low' },
+      { k: 'noise', label: 'Input noise', unit: 'nV/√Hz', dec: 1, goal: 'le', a: 12, on: false, pri: 'normal' },
+      { k: 'area', label: 'Active area', unit: 'µm²', dec: 0, goal: 'le', a: 2500, on: false, pri: 'low' },
+    ],
+    eval: function (x, c) {
+      var Ib = x.Ib * 1e-6, I1 = Ib / 2, I6 = x.K7 * Ib, Cc = x.Cc * 1e-12, CL = 2e-12 + x.W6 * 2e-15;
+      var gm1 = Math.sqrt(2 * UN * c.kn * (x.W1 / x.L1) * I1);
+      var R1 = (x.L1 / (LAM * I1)) / 2;
+      var gm6 = Math.sqrt(2 * UP * c.kp * (x.W6 / x.L6) * I6);
+      var R2 = 1 / (1 / (x.L6 / (LAM * I6)) + 1 / (0.5 / (LAM * I6)));
+      var A0 = gm1 * R1 * gm6 * R2;
+      var ugb = gm1 / (PI2 * Cc), p2 = gm6 / (PI2 * CL), z = gm6 / (PI2 * Cc);
+      var pm = 90 - Math.atan(ugb / p2) * 57.2958 - Math.atan(ugb / z) * 57.2958;
+      var vov6 = Math.sqrt(2 * I6 / (UP * c.kp * (x.W6 / x.L6)));
+      var vov7 = Math.sqrt(2 * I6 / (UN * c.kn * 10 * x.K7));
+      return {
+        gain: 20 * Math.log10(A0),
+        ugb: ugb / 1e6,
+        pm: pm,
+        power: c.vdd * (Ib + I6 + 10e-6) * 1e6,
+        slew: Math.min(Ib / Cc, I6 / (Cc + CL)) / 1e6,
+        swing: c.vdd - vov6 - vov7 - Math.max(0, c.dvth) * 2,
+        noise: Math.sqrt(16 * kB * c.tk / (3 * gm1)) * 1.41421 * 1e9,
+        area: 4 * x.W1 * x.L1 + x.W6 * x.L6 + 2 * x.K7 * 5 + x.Cc * 1000,
+      };
+    },
+  };
+
+  /* ── low-dropout regulator ─────────────────────────────── */
+  var LDO = {
+    id: 'ldo', name: 'Low-dropout regulator', bench: 'demo/ldo_50mA_tb', vdd: 1.8,
+    blurb: '1.2 V output, 50 mA load, PMOS pass device, single-stage error amplifier, external output capacitor.',
+    params: [
+      { k: 'Wp', label: 'Pass device width', unit: 'mm', v: 4, min: 0.5, max: 60 },
+      { k: 'Wea', label: 'Error-amp input width', unit: 'µm', v: 6, min: 1, max: 80 },
+      { k: 'Lea', label: 'Error-amp length', unit: 'µm', v: 0.4, min: 0.18, max: 4 },
+      { k: 'Iea', label: 'Error-amp bias', unit: 'µA', v: 6, min: 1, max: 100 },
+      { k: 'Cff', label: 'Feed-forward capacitor', unit: 'pF', v: 1, min: 0.1, max: 50 },
+      { k: 'Cout', label: 'Output capacitor', unit: 'µF', v: 1, min: 0.1, max: 4.7 },
+    ],
+    metrics: [
+      { k: 'dropout', label: 'Dropout at 50 mA', unit: 'mV', dec: 0, goal: 'le', a: 150, on: true, pri: 'high' },
+      { k: 'iq', label: 'Quiescent current', unit: 'µA', dec: 1, goal: 'le', a: 30, on: true, pri: 'normal' },
+      { k: 'psrr', label: 'PSRR at 1 kHz', unit: 'dB', dec: 1, goal: 'ge', a: 55, on: true, pri: 'normal' },
+      { k: 'loadreg', label: 'Load regulation', unit: 'mV/mA', dec: 3, goal: 'le', a: 0.03, on: true, pri: 'normal' },
+      { k: 'pm', label: 'Phase margin (worst load)', unit: '°', dec: 1, goal: 'range', a: 45, b: 80, on: true, pri: 'high' },
+      { k: 'under', label: 'Load-step undershoot', unit: 'mV', dec: 1, goal: 'le', a: 60, on: true, pri: 'normal' },
+      { k: 'area', label: 'Pass device area', unit: 'mm²', dec: 3, goal: 'le', a: 0.004, on: false, pri: 'low' },
+    ],
+    eval: function (x, c) {
+      var Lp = 0.2, W = x.Wp * 1000, Iea = x.Iea * 1e-6, Vout = 1.2, beta = 0.5;
+      var gmea = Math.sqrt(2 * UN * c.kn * (x.Wea / x.Lea) * Iea / 2);
+      var Rea = (x.Lea / (LAM * Iea / 2)) / 2;
+      var Aea = gmea * Rea;
+      var Cgd = x.Wp * 0.3e-12, Cgs = x.Wp * 1.2e-12, Cout = x.Cout * 1e-6, esr = 0.02, R1 = 200e3;
+      var zff = 1 / (PI2 * R1 * x.Cff * 1e-12), pff = zff / beta, zesr = 1 / (PI2 * esr * Cout);
+      var pmMin = 1e9, Tfull = 0, ropFull = 0, ugbFull = 0, Cg = 0;
+      [50e-3, 1e-3].forEach(function (IL) {
+        var gmp = Math.sqrt(2 * UP * c.kp * (W / Lp) * IL), rop = Lp / (LAM * IL), RL = Vout / IL;
+        var Rout = 1 / (1 / rop + 1 / RL), Ap = gmp * Rout, T = Aea * Ap * beta;
+        var Cgate = Cgs + Cgd * (1 + Ap);
+        var pout = 1 / (PI2 * Rout * Cout), ugb = T * pout, pg = 1 / (PI2 * Rea * Cgate);
+        var pm = 90 - Math.atan(ugb / pg) * 57.2958 + Math.atan(ugb / zesr) * 57.2958 + (Math.atan(ugb / zff) - Math.atan(ugb / pff)) * 57.2958;
+        pmMin = Math.min(pmMin, pm);
+        if (IL > 0.01) { Tfull = T; ropFull = rop; ugbFull = ugb; Cg = Cgate; }
+      });
+      var vdo = Math.sqrt(2 * 50e-3 / (UP * c.kp * (W / Lp))) + Math.max(0, c.dvth) * 0.5;
+      var tslew = Cg * 0.3 / Iea, dt = 1 / (PI2 * ugbFull) + tslew;
+      return {
+        dropout: vdo * 1000,
+        iq: (Iea + 3e-6 + 2e-6) * 1e6,
+        psrr: 20 * Math.log10(1 + Tfull),
+        loadreg: ropFull / (1 + Tfull),
+        pm: pmMin,
+        under: 50e-3 * Math.min(dt, 4e-6) / Cout * 1000,
+        area: W * Lp * 1e-6,
+      };
+    },
+  };
+
+  var CIRCUITS = { ota: OTA, ldo: LDO };
+
+  /* ── goals & scoring ───────────────────────────────────── */
+  // normalised margin: ≥0 passes, <0 fails (relative to the requirement's own scale)
+  function margin(m, x) {
+    var a = m.a, b = m.b, s;
+    switch (m.goal) {
+      case 'ge': s = Math.max(Math.abs(a), 1e-9); return (x - a) / s;
+      case 'le': s = Math.max(Math.abs(a), 1e-9); return (a - x) / s;
+      case 'range': s = Math.max(b - a, 1e-9); return Math.min(x - a, b - x) / s;
+      case 'tol': s = Math.max(b, Math.abs(a) * 0.02, 1e-9); return (b - Math.abs(x - a)) / s;
+    }
+    return 0;
+  }
+  var PRI = { low: 0.5, normal: 1, high: 2 };
+
+  function evaluate(circ, x, corners, metrics) {
+    var worst = {}, wc = {}, perCorner = [];
+    for (var i = 0; i < corners.length; i++) {
+      var r = circ.eval(x, corners[i]);
+      perCorner.push(r);
+      for (var j = 0; j < metrics.length; j++) {
+        var m = metrics[j], g = margin(m, r[m.k]);
+        if (!isFinite(g)) g = -10;
+        if (worst[m.k] == null || g < worst[m.k].g) { worst[m.k] = { g: g, v: r[m.k] }; wc[m.k] = i; }
+      }
+    }
+    var num = 0, den = 0, pass = 0;
+    metrics.forEach(function (m) {
+      var g = worst[m.k].g, w = PRI[m.pri] || 1;
+      var s = g >= 0 ? 0.9 + 0.1 * Math.min(1, g * 4) : 0.9 * Math.exp(-4 * Math.min(5, -g));
+      if (g >= 0) pass++;
+      num += w * s; den += w;
+    });
+    return { score: den ? num / den : 0, pass: pass, worst: worst, worstCorner: wc, perCorner: perCorner };
+  }
+
+  /* ── search (generic evolutionary loop) ────────────────── */
+  function makeRng(seed) {
+    var a = seed >>> 0 || 1;
+    var r = function () { a |= 0; a = (a + 0x6d2b79f5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    r.g = function () { var u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(PI2 * v); };
+    return r;
+  }
+
+  function Run(cfg) {
+    // cfg: { circuit, params:[{k,min,max,v,free}], metrics:[included], corners:[], gens, pop, seed }
+    this.cfg = cfg;
+    this.rng = makeRng(cfg.seed || 1);
+    this.free = cfg.params.filter(function (p) { return p.free; });
+    this.fixed = {};
+    var self = this;
+    cfg.params.forEach(function (p) { self.fixed[p.k] = p.v; });
+    this.sigma = 0.2; this.stall = 0;
+    this.gen = 0;
+    this.history = [];
+    this.evals = 0;
+    var base = this.toX(this.free.map(function (p) { return self.toU(p, p.v); }));
+    var e0 = this.score(base);
+    this.baseline = { x: base, ev: e0 };
+    this.elite = [{ u: this.free.map(function (p) { return self.toU(p, p.v); }), x: base, ev: e0, gen: 0, parent: -1 }];
+    this.best = this.elite[0];
+    this.history.push({ gen: 0, cands: [{ score: e0.score, ok: true }], best: this.best });
+  }
+  Run.prototype.toU = function (p, v) { return Math.log(v / p.min) / Math.log(p.max / p.min); };
+  Run.prototype.fromU = function (p, u) { return p.min * Math.pow(p.max / p.min, Math.min(1, Math.max(0, u))); };
+  Run.prototype.toX = function (u) {
+    var x = Object.assign({}, this.fixed), self = this;
+    this.free.forEach(function (p, i) { x[p.k] = self.fromU(p, u[i]); });
+    return x;
+  };
+  Run.prototype.score = function (x) {
+    this.evals += this.cfg.corners.length;
+    return evaluate(this.cfg.circuit, x, this.cfg.corners, this.cfg.metrics);
+  };
+  Run.prototype.step = function () {
+    var r = this.rng, self = this, lam = this.cfg.pop, cands = [], improved = 0;
+    this.gen++;
+    for (var i = 0; i < lam; i++) {
+      var pa = this.elite[Math.floor(Math.pow(r(), 1.6) * this.elite.length)];
+      var u = pa.u.slice();
+      if (this.elite.length > 2 && r() < 0.3) {
+        var pb = this.elite[Math.floor(r() * this.elite.length)];
+        for (var j = 0; j < u.length; j++) if (r() < 0.5) u[j] = pb.u[j];
+      }
+      var nmut = Math.max(1, Math.round(u.length * (r() < 0.5 ? 0.35 : 0.7)));
+      for (var m = 0; m < nmut; m++) { var d = Math.floor(r() * u.length); u[d] = Math.min(1, Math.max(0, u[d] + r.g() * this.sigma)); }
+      var x = this.toX(u), ev = this.score(x);
+      var c = { u: u, x: x, ev: ev, gen: this.gen, ok: isFinite(ev.score) };
+      if (c.ev.score > pa.ev.score) improved++;
+      cands.push(c);
+    }
+    var pool = this.elite.concat(cands).sort(function (a, b) { return b.ev.score - a.ev.score; });
+    this.elite = pool.slice(0, 6);
+    var rate = improved / lam;
+    this.sigma = Math.min(0.35, Math.max(0.015, this.sigma * (rate > 0.2 ? 1.18 : 0.86)));
+    var prevBest = this.best;
+    this.best = this.elite[0];
+    if (this.best === prevBest) { this.stall++; if (this.stall >= 4 && this.best.ev.pass < this.cfg.metrics.length) { this.sigma = 0.28; this.stall = 0; } } else this.stall = 0;
+    var h = { gen: this.gen, cands: cands.map(function (c) { return { score: c.ev.score, pass: c.ev.pass }; }), best: this.best, newBest: this.best !== prevBest };
+    this.history.push(h);
+    return h;
+  };
+
+  return {
+    CIRCUITS: CIRCUITS, PROC: Object.keys(PROC), TEMPS: Object.keys(TEMPS), VDDS: Object.keys(VDDS), VDD_F: VDDS,
+    corner: corner, evaluate: evaluate, margin: margin, Run: Run,
+  };
+})();
+if (typeof module !== 'undefined') module.exports = DemoEngine;
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var E = DemoEngine;
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
+  var EFFORT = { quick: 8, balanced: 16, thorough: 32 };
+  var GOALS = { ge: 'Greater Than / Equal To', le: 'Less Than / Equal To', range: 'Stay in Range', tol: 'Target ± Tolerance' };
+  var PRIS = ['low', 'normal', 'high'];
+  var TEMP_L = { '-40': '−40°C', '27': '27°C', '125': '125°C' };
+  var VDD_L = { low: '−10%', nom: 'nominal', high: '+10%' };
+
+  var S = {
+    step: 1, circ: 'ota', metrics: null, params: null, gens: 20, effort: 'balanced',
+    corners: { p: ['tt', 'ss', 'ff'], t: ['-40', '27', '125'], v: ['nom'] }, ran: false,
+  };
+  var R = null;
+
+  function circ() { return E.CIRCUITS[S.circ]; }
+  function loadCircuit(id) {
+    S.circ = id;
+    var C = circ();
+    S.metrics = clone(C.metrics);
+    S.params = C.params.map(function (p) { var q = clone(p); q.free = true; return q; });
+    $('#benchName').textContent = C.bench;
+    S.ran = false;
+    $('#tab4').disabled = true;
+  }
+  function fmt(v, dec) {
+    if (v == null || !isFinite(v)) return '—';
+    var a = Math.abs(v);
+    if (a >= 10000) return Math.round(v).toLocaleString('en-US');
+    return v.toFixed(dec);
+  }
+  function fmtP(p, v) { var d = v >= 100 ? 0 : v >= 10 ? 1 : 2; return v.toFixed(d); }
+  function baselineTT() {
+    var C = circ(), x = {};
+    C.params.forEach(function (p) { x[p.k] = p.v; });
+    return C.eval(x, E.corner('tt', '27', 'nom', C.vdd));
+  }
+  function goalText(m) {
+    var u = m.unit === '°' ? '°' : ' ' + m.unit;
+    if (m.goal === 'ge') return '≥ ' + m.a + u;
+    if (m.goal === 'le') return '≤ ' + m.a + u;
+    if (m.goal === 'range') return m.a + '–' + m.b + u;
+    return m.a + ' ± ' + m.b + u;
+  }
+
+  /* ── step navigation ── */
+  function go(n) {
+    if (n > S.step && n >= 3 && !validateTargets()) { if (S.step !== 2) show(2); validateTargets(); return; }
+    if (n === 4 && !S.ran) return;
+    show(n);
+  }
+  function show(n) {
+    S.step = n;
+    for (var i = 1; i <= 4; i++) {
+      $('#pane' + i).hidden = i !== n;
+      $('#tab' + i).setAttribute('aria-selected', i === n ? 'true' : 'false');
+      $('#tab' + i).classList.toggle('ok', i < n && !(i === 4));
+    }
+    if (n === 1) renderStep1();
+    if (n === 2) renderTargets();
+    if (n === 3) renderStep3();
+    if (n === 4) resizeChart();
+  }
+  document.querySelectorAll('.tab').forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.step); }); });
+  document.querySelectorAll('[data-go]').forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.go); }); });
+
+  /* ── step 1 ── */
+  var SCHEM = {
+    ota: '<svg viewBox="0 0 280 112" aria-hidden="true"><g fill="none" stroke="#3D7BFF" stroke-width="1.4"><path d="M20 40h30M20 72h30M146 56h40M232 56h30M186 56v-30h22M226 26h8v30"/><path d="M110 56h36"/></g><g fill="none" stroke="#E5E5E5" stroke-width="1.6"><path d="M50 24v64l60-32z"/><path d="M186 36v40l46-20z"/><path d="M208 18v16M213 18v16"/></g><g fill="#3D7BFF"><rect x="143" y="53" width="6" height="6"/><rect x="183" y="53" width="6" height="6"/><rect x="229" y="53" width="6" height="6"/></g><g font-family="JetBrains Mono,monospace" font-size="9" fill="#A3A3A3"><text x="6" y="43">in+</text><text x="6" y="75">in−</text><text x="200" y="12">Cc</text><text x="240" y="50">out</text><text x="66" y="100">stage 1</text><text x="182" y="100">stage 2</text></g></svg>',
+    ldo: '<svg viewBox="0 0 280 112" aria-hidden="true"><g fill="none" stroke="#3D7BFF" stroke-width="1.4"><path d="M14 14h252M150 14v18M150 56v20M150 76h96M246 76v20M200 76v4M200 100v6M14 106h252M96 56h40M30 46h20M30 66h20M200 82v18"/><path d="M110 66h40v-2"/></g><g fill="none" stroke="#E5E5E5" stroke-width="1.6"><path d="M50 32v48l46-24z"/><path d="M136 44h8M144 36v16M150 32v24"/><path d="M196 82h8v18h-8zM238 96h16M238 100h16"/></g><g fill="#3D7BFF"><rect x="147" y="73" width="6" height="6"/><rect x="197" y="73" width="6" height="6"/></g><g font-family="JetBrains Mono,monospace" font-size="9" fill="#A3A3A3"><text x="18" y="10">vin 1.8V</text><text x="6" y="42">ref</text><text x="6" y="70">fb</text><text x="160" y="46">pass</text><text x="208" y="70">vout 1.2V</text><text x="258" y="92">C</text></g></svg>',
+  };
+  function renderStep1() {
+    var html = '';
+    ['ota', 'ldo'].forEach(function (id) {
+      var C = E.CIRCUITS[id];
+      html += '<button class="card" type="button" data-c="' + id + '" aria-pressed="' + (S.circ === id) + '">' + SCHEM[id] +
+        '<h3>' + esc(C.name) + '</h3><p>' + esc(C.blurb) + '</p><span class="meta">' + C.bench + ' · ' + C.params.length + ' values · ' + C.metrics.length + ' metrics</span></button>';
+    });
+    html += '<div class="card locked"><div class="lock">Your own testbench<br>Cadence ADE · Spectre · your PDK</div><h3>Bring your circuit</h3><p>Load a completed simulation from your own library in the full product.</p><span class="meta">available in the full demo</span></div>';
+    $('#cards').innerHTML = html;
+    document.querySelectorAll('.card[data-c]').forEach(function (b) {
+      b.addEventListener('click', function () { if (S.circ !== b.dataset.c) { loadCircuit(b.dataset.c); renderStep1(); } });
+    });
+    var bt = baselineTT(), C = circ();
+    $('#baseCorner').textContent = 'tt · 27°C · ' + C.vdd.toFixed(2) + 'V';
+    $('#baseBody').innerHTML = C.metrics.map(function (m) {
+      return '<tr><td class="mname">' + esc(m.label) + '<small>' + m.k + '</small></td><td class="num">' + fmt(bt[m.k], m.dec) + '</td><td>' + esc(m.unit) + '</td></tr>';
+    }).join('');
+  }
+
+  /* ── step 2 ── */
+  function renderTargets() {
+    var bt = baselineTT();
+    $('#tgtBody').innerHTML = S.metrics.map(function (m, i) {
+      var det;
+      if (m.goal === 'ge' || m.goal === 'le') det = '<span>' + (m.goal === 'ge' ? '≥' : '≤') + '</span><input type="number" step="any" id="ga' + i + '" data-i="' + i + '" data-f="a" value="' + m.a + '" aria-label="' + esc(m.label) + ' limit"><span>' + esc(m.unit) + '</span>';
+      else if (m.goal === 'range') det = '<input type="number" step="any" id="ga' + i + '" data-i="' + i + '" data-f="a" value="' + m.a + '" aria-label="' + esc(m.label) + ' lower"><span>to</span><input type="number" step="any" id="gb' + i + '" data-i="' + i + '" data-f="b" value="' + m.b + '" aria-label="' + esc(m.label) + ' upper"><span>' + esc(m.unit) + '</span>';
+      else det = '<input type="number" step="any" id="ga' + i + '" data-i="' + i + '" data-f="a" value="' + m.a + '" aria-label="' + esc(m.label) + ' target"><span>±</span><input type="number" step="any" min="0" id="gb' + i + '" data-i="' + i + '" data-f="b" value="' + m.b + '" aria-label="' + esc(m.label) + ' tolerance"><span>' + esc(m.unit) + '</span>';
+      return '<tr class="' + (m.on ? '' : 'off') + '"><td><input type="checkbox" id="inc' + i + '" data-i="' + i + '" ' + (m.on ? 'checked' : '') + ' aria-label="Include ' + esc(m.label) + '"></td>' +
+        '<td class="mname">' + esc(m.label) + '<small>' + m.k + ' · ' + esc(m.unit) + '</small></td>' +
+        '<td class="num">' + fmt(bt[m.k], m.dec) + '</td>' +
+        '<td><select id="gs' + i + '" data-i="' + i + '" aria-label="' + esc(m.label) + ' goal">' + Object.keys(GOALS).map(function (g) { return '<option value="' + g + '"' + (g === m.goal ? ' selected' : '') + '>' + GOALS[g] + '</option>'; }).join('') + '</select></td>' +
+        '<td><div class="goal">' + det + '</div></td>' +
+        '<td><select id="gp' + i + '" data-i="' + i + '" aria-label="' + esc(m.label) + ' priority">' + PRIS.map(function (p) { return '<option value="' + p + '"' + (p === m.pri ? ' selected' : '') + '>' + p[0].toUpperCase() + p.slice(1) + '</option>'; }).join('') + '</select></td></tr>';
+    }).join('');
+    var body = $('#tgtBody');
+    body.querySelectorAll('input[type="checkbox"]').forEach(function (el) { el.addEventListener('change', function () { S.metrics[+el.dataset.i].on = el.checked; el.closest('tr').classList.toggle('off', !el.checked); invalidate(); }); });
+    body.querySelectorAll('input[type="number"]').forEach(function (el) { el.addEventListener('input', function () { S.metrics[+el.dataset.i][el.dataset.f] = el.value === '' ? NaN : +el.value; el.classList.remove('bad'); invalidate(); }); });
+    body.querySelectorAll('select[id^="gs"]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        var m = S.metrics[+el.dataset.i], v = bt[m.k], old = m.goal;
+        m.goal = el.value;
+        var nice = function (x) { var d = Math.abs(x) >= 100 ? 0 : Math.abs(x) >= 1 ? 1 : 3; return +x.toFixed(d); };
+        if (m.goal === 'range' && old !== 'range') { m.a = nice(isFinite(m.a) ? Math.min(m.a, v) * 0.9 : v * 0.8); m.b = nice(isFinite(m.a) ? Math.max(m.a, v) * 1.2 : v * 1.2); if (m.b <= m.a) m.b = nice(m.a * 1.3 + 1); }
+        if (m.goal === 'tol') { m.a = nice(isFinite(m.a) ? m.a : v); m.b = nice(Math.abs(m.a) * 0.05 || 1); }
+        renderTargets(); invalidate();
+      });
+    });
+    body.querySelectorAll('select[id^="gp"]').forEach(function (el) { el.addEventListener('change', function () { S.metrics[+el.dataset.i].pri = el.value; invalidate(); }); });
+    $('#err2').textContent = '';
+  }
+  $('#resetTargets').addEventListener('click', function () { S.metrics = clone(circ().metrics); renderTargets(); invalidate(); });
+  function validateTargets() {
+    var msg = '', on = S.metrics.filter(function (m) { return m.on; });
+    document.querySelectorAll('#tgtBody input.bad').forEach(function (el) { el.classList.remove('bad'); });
+    if (!on.length) msg = 'Include at least one metric to optimise.';
+    S.metrics.forEach(function (m, i) {
+      if (!m.on || msg) return;
+      var bad = function (f, t) { var el = document.getElementById('g' + f + i); if (el) el.classList.add('bad'); msg = m.label + ': ' + t; };
+      if (!isFinite(m.a)) return bad('a', 'enter a number.');
+      if ((m.goal === 'range' || m.goal === 'tol') && !isFinite(m.b)) return bad('b', 'enter a number.');
+      if (m.goal === 'range' && m.a >= m.b) return bad('a', 'the lower limit must be below the upper limit.');
+      if (m.goal === 'tol' && m.b <= 0) return bad('b', 'the tolerance must be greater than zero.');
+    });
+    $('#err2').textContent = msg;
+    return !msg;
+  }
+  function invalidate() { if (R && R.running) return; S.ran = false; $('#tab4').disabled = true; }
+
+  /* ── step 3 ── */
+  function chipGroup(el, key, vals, labels) {
+    el.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
+    vals.forEach(function (v) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.textContent = labels ? labels[v] : v;
+      b.setAttribute('aria-pressed', S.corners[key].indexOf(v) >= 0 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var arr = S.corners[key], i = arr.indexOf(v);
+        if (i >= 0) arr.splice(i, 1); else arr.push(v);
+        b.setAttribute('aria-pressed', i >= 0 ? 'false' : 'true');
+        updateEstimate(); invalidate();
+      });
+      el.appendChild(b);
+    });
+  }
+  function renderStep3() {
+    $('#parBody').innerHTML = S.params.map(function (p, i) {
+      return '<tr class="' + (p.free ? '' : 'off') + '"><td><input type="checkbox" id="pf' + i + '" data-i="' + i + '" ' + (p.free ? 'checked' : '') + ' aria-label="Allow ' + esc(p.label) + ' to change"></td>' +
+        '<td class="mname">' + esc(p.label) + '<small>' + p.k + ' · ' + esc(p.unit) + '</small></td>' +
+        '<td class="num">' + fmtP(p, p.v) + '</td>' +
+        '<td><input type="number" step="any" id="pmin' + i + '" data-i="' + i + '" data-f="min" value="' + p.min + '" aria-label="' + esc(p.label) + ' lower bound"></td>' +
+        '<td><input type="number" step="any" id="pmax' + i + '" data-i="' + i + '" data-f="max" value="' + p.max + '" aria-label="' + esc(p.label) + ' upper bound"></td></tr>';
+    }).join('');
+    $('#parBody').querySelectorAll('input[type="checkbox"]').forEach(function (el) { el.addEventListener('change', function () { S.params[+el.dataset.i].free = el.checked; el.closest('tr').classList.toggle('off', !el.checked); invalidate(); }); });
+    $('#parBody').querySelectorAll('input[type="number"]').forEach(function (el) { el.addEventListener('input', function () { S.params[+el.dataset.i][el.dataset.f] = el.value === '' ? NaN : +el.value; el.classList.remove('bad'); invalidate(); }); });
+    chipGroup($('#cProc'), 'p', E.PROC);
+    chipGroup($('#cTemp'), 't', E.TEMPS, TEMP_L);
+    chipGroup($('#cVdd'), 'v', E.VDDS, VDD_L);
+    $('#gens').value = S.gens; $('#gensVal').textContent = S.gens;
+    document.querySelectorAll('#effort button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.v === S.effort ? 'true' : 'false'); });
+    updateEstimate();
+    $('#err3').textContent = '';
+  }
+  $('#gens').addEventListener('input', function () { S.gens = +this.value; $('#gensVal').textContent = S.gens; updateEstimate(); });
+  document.querySelectorAll('#effort button').forEach(function (b) {
+    b.addEventListener('click', function () { S.effort = b.dataset.v; document.querySelectorAll('#effort button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); updateEstimate(); });
+  });
+  function nCorners() { return S.corners.p.length * S.corners.t.length * S.corners.v.length; }
+  function updateEstimate() {
+    var n = nCorners(), sims = S.gens * EFFORT[S.effort] * n;
+    $('#cornerCount').textContent = n + ' corner' + (n === 1 ? '' : 's') + ' · ' + S.corners.p.length + ' process × ' + S.corners.t.length + ' temperature × ' + S.corners.v.length + ' supply';
+    $('#estimate').innerHTML = '<b>' + S.gens + '</b> generations × <b>' + EFFORT[S.effort] + '</b> candidates × <b>' + n + '</b> corners<br>≈ <b>' + sims.toLocaleString('en-US') + '</b> simulated evaluations';
+  }
+  function validateStep3() {
+    var msg = '';
+    document.querySelectorAll('#parBody input.bad').forEach(function (el) { el.classList.remove('bad'); });
+    if (!S.params.some(function (p) { return p.free; })) msg = 'Allow at least one value to change.';
+    S.params.forEach(function (p, i) {
+      if (msg) return;
+      var bad = function (f, t) { var el = document.getElementById('p' + f + i); if (el) el.classList.add('bad'); msg = p.label + ': ' + t; };
+      if (!isFinite(p.min) || p.min <= 0) return bad('min', 'the lower bound must be a positive number.');
+      if (!isFinite(p.max)) return bad('max', 'enter an upper bound.');
+      if (p.min >= p.max) return bad('min', 'the lower bound must be below the upper bound.');
+      if (p.v < p.min || p.v > p.max) return bad(p.v < p.min ? 'min' : 'max', 'the bounds must include the baseline (' + fmtP(p, p.v) + ' ' + p.unit + ').');
+    });
+    if (!msg && !nCorners()) msg = 'Select at least one process, temperature and supply.';
+    $('#err3').textContent = msg;
+    return !msg;
+  }
+
+  /* ── step 4: run ── */
+  function buildCorners() {
+    var C = circ(), out = [];
+    S.corners.p.forEach(function (p) { S.corners.t.forEach(function (t) { S.corners.v.forEach(function (v) { out.push(E.corner(p, t, v, C.vdd)); }); }); });
+    return out;
+  }
+  function logLine(html) {
+    var d = document.createElement('div'); d.innerHTML = html;
+    var L = $('#log'); L.appendChild(d);
+    while (L.children.length > 40) L.removeChild(L.firstChild);
+  }
+  var pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
+
+  $('#startBtn').addEventListener('click', function () {
+    if (!validateTargets()) { show(2); validateTargets(); return; }
+    if (!validateStep3()) return;
+    startRun();
+  });
+  $('#stopBtn').addEventListener('click', function () { if (R && R.running) { R.stopped = true; finish(); } });
+
+  function startRun() {
+    var C = circ(), corners = buildCorners();
+    var mets = S.metrics.filter(function (m) { return m.on; }).map(clone);
+    var run = new E.Run({ circuit: C, params: S.params.map(clone), metrics: mets, corners: corners, gens: S.gens, pop: EFFORT[S.effort], seed: (Date.now() % 1e9) | 0 });
+    R = { run: run, C: C, corners: corners, mets: mets, running: true, stopped: false, dots: [], firstAll: -1, lastBest: run.baseline, timer: 0 };
+    S.ran = true; $('#tab4').disabled = false;
+    $('#log').innerHTML = ''; $('#review').hidden = true;
+    $('#stopBtn').hidden = false;
+    setPill('RUNNING', 'run');
+    show(4);
+    R.dots.push({ g: 0, s: run.baseline.ev.score, t: performance.now(), base: true });
+    var b = run.baseline.ev;
+    logLine('<span class="k">$ optim run ' + C.bench + '</span>');
+    logLine('[preflight] <span class="p">PASS</span> baseline verified · ' + mets.length + ' objectives · ' + corners.length + ' corners');
+    logLine('[preflight] <span class="p">PASS</span> ' + run.free.length + ' values may change · ' + (S.params.length - run.free.length) + ' fixed');
+    logLine('gen 00 · baseline · score ' + b.score.toFixed(4) + ' · targets ' + b.pass + '/' + mets.length);
+    if (b.pass === mets.length) R.firstAll = 0;
+    renderLive(run.baseline, true);
+    updateProgress(0);
+    R.delay = Math.max(320, Math.min(900, 15000 / S.gens));
+    R.timer = setTimeout(tick, 650);
+    loop();
+  }
+  function tick() {
+    if (!R || !R.running) return;
+    var run = R.run, h = run.step(), now = performance.now(), n = h.cands.length;
+    h.cands.forEach(function (c, i) { R.dots.push({ g: h.gen, s: c.score, t: now + (i / n) * R.delay * 0.7 }); });
+    var best = run.best, all = R.mets.length;
+    logLine('gen ' + pad2(h.gen) + ' · ' + n + ' candidates · ' + R.corners.length + ' corners each');
+    logLine('gen ' + pad2(h.gen) + ' complete · best <span class="k">' + best.ev.score.toFixed(4) + '</span> · targets ' +
+      (best.ev.pass === all ? '<span class="p">' + best.ev.pass + '/' + all + '</span>' : best.ev.pass + '/' + all) + (h.newBest ? ' · <span class="p">▲ new best</span>' : ''));
+    if (best.ev.pass === all && R.firstAll < 0) { R.firstAll = h.gen; logLine('[evolution] <span class="p">ALL TARGETS PASS</span> at every corner · gen ' + pad2(h.gen) + ' · continuing for margin'); }
+    renderLive(best, h.newBest);
+    updateProgress(h.gen);
+    if (h.gen >= S.gens) { finish(); return; }
+    R.timer = setTimeout(tick, R.delay);
+  }
+  function updateProgress(g) {
+    $('#genCount').textContent = 'gen ' + pad2(g) + ' / ' + S.gens;
+    $('#prog').style.width = (100 * g / S.gens) + '%';
+    $('#evals').textContent = R.run.evals.toLocaleString('en-US') + ' simulations';
+    $('#bestScore').textContent = 'best ' + R.run.best.ev.score.toFixed(4);
+  }
+  function setPill(t, cls) { var p = $('#pill'); p.textContent = t; p.className = 'pill' + (cls ? ' ' + cls : ''); }
+
+  function renderLive(best, changed) {
+    var base = R.run.baseline, all = R.mets.length;
+    $('#passCount').textContent = best.ev.pass + ' / ' + all + ' passing';
+    $('#liveT').innerHTML = R.mets.map(function (m) {
+      var w = best.ev.worst[m.k], b0 = base.ev.worst[m.k], ok = w.g >= 0;
+      return '<tr><td class="mname">' + esc(m.label) + '</td><td class="mono hide-sm" style="white-space:nowrap">' + esc(goalText(m)) + '</td><td class="num">' + fmt(b0.v, m.dec) + '</td><td class="num">' + fmt(w.v, m.dec) + '</td><td><span class="st ' + (ok ? 'p' : 'f') + '">' + (ok ? 'PASS' : 'FAIL') + '</span></td></tr>';
+    }).join('');
+    var nch = 0;
+    $('#liveP').innerHTML = R.run.cfg.params.map(function (p) {
+      var v = best.x[p.k], d = (v - p.v) / p.v * 100, moved = Math.abs(d) > 0.5;
+      if (moved) nch++;
+      var cls = changed && moved ? ' class="flash"' : '';
+      return '<tr' + cls + '><td class="mname">' + esc(p.label) + '<small>' + p.k + ' · ' + esc(p.unit) + (p.free ? '' : ' · fixed') + '</small></td><td class="num hide-sm">' + fmtP(p, p.v) + '</td><td class="num">' + fmtP(p, v) + '</td><td class="num"><span class="delta' + (moved ? ' up' : '') + '">' + (moved ? (d > 0 ? '+' : '') + d.toFixed(0) + '%' : '—') + '</span></td></tr>';
+    }).join('');
+    $('#chgCount').textContent = nch + ' changed';
+    renderHeat(best);
+  }
+  function renderHeat(best) {
+    var cs = R.corners, mets = R.mets, el = $('#heat');
+    el.style.gridTemplateColumns = 'max-content repeat(' + cs.length + ', minmax(14px, 1fr))';
+    var html = '<div></div>';
+    cs.forEach(function (c, i) {
+      var first = i === 0 || cs[i - 1].p !== c.p;
+      html += '<div class="cl" title="' + esc(c.name) + '">' + (first ? c.p : '') + '</div>';
+    });
+    mets.forEach(function (m) {
+      html += '<div class="rl">' + esc(m.label) + '</div>';
+      best.ev.perCorner.forEach(function (r, i) {
+        var g = E.margin(m, r[m.k]);
+        var bg = g < 0 ? 'color-mix(in srgb, var(--fail) ' + Math.round(45 + Math.min(55, -g * 160)) + '%, var(--paper))' : 'color-mix(in srgb, var(--pass) ' + Math.round(30 + Math.min(70, g * 260)) + '%, var(--paper))';
+        html += '<div class="c" style="background:' + bg + '" title="' + esc(cs[i].name + ' · ' + m.label + ' ' + fmt(r[m.k], m.dec) + ' ' + m.unit + ' · ' + (g >= 0 ? 'pass' : 'fail')) + '"></div>';
+      });
+    });
+    el.innerHTML = html;
+  }
+
+  function finish() {
+    if (!R) return;
+    R.running = false; clearTimeout(R.timer);
+    $('#stopBtn').hidden = true;
+    var best = R.run.best, all = R.mets.length, base = R.run.baseline, ok = best.ev.pass === all;
+    setPill(ok ? 'CONVERGED' : 'REVIEW', ok ? 'done' : 'part');
+    logLine('[evolution] ' + (R.stopped ? 'stopped by user' : 'run complete') + ' · best gen ' + pad2(best.gen) + ' · ' + best.ev.pass + '/' + all + ' targets');
+    var title, text;
+    if (ok) {
+      title = 'All ' + all + ' targets pass at all ' + R.corners.length + ' corners';
+      text = 'The baseline passed ' + base.ev.pass + ' of ' + all + '. OPTIM reached every target by generation ' + R.firstAll + ' and used the remaining generations to add margin. Review the changes below before applying them; in the product, applying publishes the candidate to your schematic.';
+    } else {
+      var hard = null, hg = 0;
+      R.mets.forEach(function (m) { var g = best.ev.worst[m.k].g * ({ low: 0.5, normal: 1, high: 2 }[m.pri]); if (g < hg) { hg = g; hard = m; } });
+      var wc = R.corners[best.ev.worstCorner[hard.k]];
+      title = best.ev.pass + ' of ' + all + ' targets pass';
+      text = 'Hardest target: ' + hard.label + ' ' + goalText(hard) + ', which reaches ' + fmt(best.ev.worst[hard.k].v, hard.dec) + ' ' + hard.unit + ' at ' + wc.name + '. The goals may conflict at these corners. Try relaxing it, lowering its priority, allowing more values to change or widening their bounds.';
+    }
+    $('#review').innerHTML = '<div><span class="eyebrow">' + (ok ? 'Converged' : 'Review') + ' · ' + esc(R.C.bench) + '</span><h3>' + esc(title) + '</h3><p>' + esc(text) + '</p></div>' +
+      '<div class="acts"><button class="btn ghost" type="button" id="adjBtn">Adjust targets</button><button class="btn ghost" type="button" id="againBtn">Run again</button><a class="btn" href="contact.html" ><span class="dot"></span>Run it on your circuit</a></div>' +
+      '<div class="stats"><div><b>' + base.ev.pass + ' → ' + best.ev.pass + '</b><span>targets passing</span></div><div><b>' + base.ev.score.toFixed(3) + ' → ' + best.ev.score.toFixed(3) + '</b><span>combined score</span></div><div><b>' + R.run.evals.toLocaleString('en-US') + '</b><span>simulations</span></div><div><b>' + (ok ? 'gen ' + R.firstAll : 'gen ' + best.gen) + '</b><span>' + (ok ? 'first all-pass' : 'best candidate') + '</span></div></div>';
+    $('#review').hidden = false;
+    $('#adjBtn').addEventListener('click', function () { show(2); });
+    $('#againBtn').addEventListener('click', function () { startRun(); });
+  }
+
+  /* ── score chart ── */
+  var cv = $('#chart'), ctx = cv.getContext('2d'), raf = 0;
+  function resizeChart() {
+    var r = cv.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1);
+    if (!r.width) return;
+    cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    drawChart();
+  }
+  window.addEventListener('resize', resizeChart);
+  function loop() {
+    cancelAnimationFrame(raf);
+    var until = performance.now() + 1200;
+    var f = function () { drawChart(); if ((R && R.running) || performance.now() < until) raf = requestAnimationFrame(f); };
+    raf = requestAnimationFrame(f);
+  }
+  function tok(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function drawChart() {
+    var w = cv.clientWidth, h = cv.clientHeight; if (!w) return;
+    ctx.clearRect(0, 0, w, h);
+    if (!R) return;
+    var ink = tok('--ink'), pass = tok('--pass'), info = tok('--info'), fail = tok('--fail'), dim = tok('--dim'), line = tok('--line'), mono = tok('--mono');
+    var x0 = 44, x1 = w - 14, y0 = 14, y1 = h - 28, G = S.gens;
+    var X = function (g) { return x0 + (x1 - x0) * g / G; }, Y = function (s) { return y1 - (y1 - y0) * Math.max(0, Math.min(1, s)); };
+    ctx.font = '500 10px ' + mono; ctx.fillStyle = dim; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) { ctx.fillStyle = line; ctx.fillRect(x0, Math.round(Y(v)), x1 - x0, 1); ctx.fillStyle = dim; ctx.fillText(v.toFixed(2), x0 - 8, Y(v)); });
+    ctx.textAlign = 'center';
+    var step = G > 24 ? 10 : 5;
+    for (var g = 0; g <= G; g += step) ctx.fillText(String(g), X(g), y1 + 14);
+    // all-pass line
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = pass; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.moveTo(x0, Y(0.9)); ctx.lineTo(x1, Y(0.9)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    ctx.textAlign = 'right'; var lt = 'all targets pass ≥ 0.90', lw = ctx.measureText(lt).width; ctx.fillStyle = tok('--paper'); ctx.fillRect(x1 - lw - 6, Y(0.9) + 3, lw + 6, 14); ctx.fillStyle = pass; ctx.fillText(lt, x1 - 3, Y(0.9) + 10);
+    var now = performance.now();
+    // candidates
+    R.dots.forEach(function (d) {
+      var t = (now - d.t) / 400; if (t < 0) return;
+      var a = Math.min(1, t), jit = ((d.s * 9301 + d.g * 49297) % 1) * 0.5 - 0.25;
+      var age = (R.run.gen - d.g);
+      ctx.globalAlpha = a * (age <= 0 ? 0.9 : Math.max(0.2, 0.55 - age * 0.03));
+      ctx.fillStyle = age <= 0 ? info : ink;
+      ctx.beginPath(); ctx.arc(X(d.g + (d.base ? 0 : jit)), Y(d.s), d.base ? 4 : 2.2, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    // best-so-far line
+    ctx.beginPath();
+    R.run.history.forEach(function (hh, i) { var x = X(hh.gen), y = Y(hh.best.ev.score); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke(); ctx.lineWidth = 1;
+    var last = R.run.history[R.run.history.length - 1];
+    ctx.beginPath(); ctx.arc(X(last.gen), Y(last.best.ev.score), 4.5, 0, Math.PI * 2); ctx.fillStyle = last.best.ev.pass === R.mets.length ? pass : ink; ctx.fill();
+    if (R.firstAll > 0) {
+      var fx = X(R.firstAll);
+      ctx.strokeStyle = pass; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(fx, y0); ctx.lineTo(fx, y1); ctx.stroke(); ctx.setLineDash([]);
+    }
+    if (R.run.history.length === 1) { ctx.fillStyle = dim; ctx.textAlign = 'left'; ctx.fillText('baseline', X(0) + 8, Y(R.run.baseline.ev.score) - 10); }
+  }
+
+  /* boot */
+  loadCircuit('ota');
+  renderStep1();
+  updateEstimate();
+})();
+</script>
+
+</body>
+</html>

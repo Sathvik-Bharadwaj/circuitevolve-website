@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://sathvik-bharadwaj.github.io/circuitevolve-website/sitemap.xml

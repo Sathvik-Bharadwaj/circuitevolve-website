@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works · circuitEvolve</title>
+<meta name="description" content="Bring your baseline, set the boundaries, let OPTIM explore, then review and apply.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://sathvik-bharadwaj.github.io/circuitevolve-website/how-it-works.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How it works · circuitEvolve">
+<meta property="og:description" content="Bring your baseline, set the boundaries, let OPTIM explore, then review and apply.">
+<meta property="og:url" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/how-it-works.html">
+<meta property="og:image" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="preload" href="assets/jakarta.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="css/site.css">
+<script src="js/ce-sims.js" defer></script>
+<script src="assets/three.min.js" defer></script>
+<script src="js/scenes.js" defer></script>
+<script src="js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+  <nav class="navlinks" id="navlinks" aria-label="Main"><a href="optim.html">OPTIM</a><a href="how-it-works.html" aria-current="page">How it works</a><a href="verification.html">Verification</a><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Thesis</a><a class="m-only" href="contact.html">Contact</a><a class="m-only" href="demo.html">Try OPTIM ↗</a></nav>
+  <div class="nav-cta"><a class="btn ghost sm" href="contact.html">Contact</a><a class="btn sm" href="demo.html">Try OPTIM <span class="arr">↗</span></a></div>
+  <button class="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span></span></button>
+</div></header>
+<main id="main">
+<section class="phero">
+  <div class="wrap">
+    <span class="eyebrow rise">How it works</span>
+    <h1 class="rise" style="--d:.1s">One loop. <span class="grad">Four decisions.</span></h1>
+    <p class="rise" style="--d:.2s">From a saved simulation to a reviewed result. You decide what good looks like and what may change. OPTIM does the searching. You make the final call.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap loop">
+    <div class="scene loop-scene" data-scene="loop" id="loop-scene" data-reveal>
+      <span class="scene-label loop-label">01 BASELINE</span><span class="scene-label loop-label">02 BOUNDARIES</span><span class="scene-label loop-label">03 EXPLORE</span><span class="scene-label loop-label">04 REVIEW</span>
+    </div>
+    <div class="steps" data-reveal style="--d:.08s">
+      <button class="step on" type="button" aria-pressed="true"><span class="k">01</span><span><h3>Bring your baseline</h3><p>Load a completed simulation. OPTIM reads its parameters, measurement expressions, results and discovered conditions.</p></span><span class="bar"><i></i></span></button>
+      <button class="step" type="button" aria-pressed="false"><span class="k">02</span><span><h3>Set the boundaries</h3><p>Choose targets and priorities, the circuit values that may change and their limits, and every corner the design must pass.</p></span><span class="bar"><i></i></span></button>
+      <button class="step" type="button" aria-pressed="false"><span class="k">03</span><span><h3>Let OPTIM explore</h3><p>Candidates are generated, simulated across your corners and scored, generation after generation, while the population converges.</p></span><span class="bar"><i></i></span></button>
+      <button class="step" type="button" aria-pressed="false"><span class="k">04</span><span><h3>Review, then apply</h3><p>Compare measurements and circuit changes against the baseline, then publish the chosen candidate to your schematic.</p></span><span class="bar"><i></i></span></button>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="head">
+      <div data-reveal><span class="eyebrow"><span class="n">01</span> What you control</span><h2>Write the specification once.</h2></div>
+      <p data-reveal style="--d:.08s">The same goal rules a designer would use, in the units of each measurement. A combined score never replaces the specification.</p>
+    </div>
+    <div class="tbl" data-reveal>
+      <table class="rules">
+        <thead><tr><th>Rule</th><th>What it means</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Greater Than / Equal To</td><td>The lowest acceptable value.</td><td><code>gain ≥ 40 dB</code></td></tr>
+          <tr><td>Less Than / Equal To</td><td>The highest acceptable value.</td><td><code>power ≤ 300 µW</code></td></tr>
+          <tr><td>Stay in Range</td><td>Both limits matter.</td><td><code>phase margin 50–70°</code></td></tr>
+          <tr><td>Target ± Tolerance</td><td>A desired value with an absolute tolerance.</td><td><code>10 ± 0.5</code></td></tr>
+          <tr><td>Priority</td><td>Low, Normal or High relative importance.</td><td><code>PM · High</code></td></tr>
+          <tr><td>Allowed changes</td><td>Which values may move, and their bounds.</td><td><code>W6 2–200 µm</code></td></tr>
+          <tr><td>Corners</td><td>Process, temperature and supply conditions every candidate must pass.</td><td><code>ss · 125°C · 1.62 V</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sec tight"><div class="wrap"><div class="cta" data-reveal>
+  <div class="scene" data-scene="waves" id="waves-how"></div>
+  <span class="eyebrow">Try it</span><h2>Set your own targets.</h2><p>Pick a sample circuit, write a specification, choose corners and watch a run converge in your browser.</p>
+  <div class="actions"><a class="btn" href="demo.html">Open the interactive demo <span class="arr">↗</span></a><a class="btn ghost" href="verification.html">Verification <span class="arr">↗</span></a></div>
+</div></div></section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+        <p>AI for analog circuit design. Simulation-driven exploration, engineer-led decisions.</p>
+      </div>
+      <nav class="footer-col" aria-label="Platform"><h4>Platform</h4><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a href="demo.html">Interactive demo</a></nav>
+      <nav class="footer-col" aria-label="Company"><h4>Company</h4><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Our thesis</a><a href="contact.html">Contact</a></nav>
+    </div>
+    <div class="footer-bot">
+      <span>© <span data-year>2026</span> circuitEvolve</span>
+      <span class="footer-links"><a href="mailto:hello@circuitevolve.com">hello@circuitevolve.com</a><a href="https://www.linkedin.com/company/circuitevolve/" target="_blank" rel="noopener">LinkedIn ↗</a><a href="#main">Back to top ↑</a></span>
+    </div>
+  </div>
+</footer>
+<button class="motion-toggle" type="button" aria-pressed="false">Pause motion <span aria-hidden="true">Ⅱ</span></button>
+</body>
+</html>

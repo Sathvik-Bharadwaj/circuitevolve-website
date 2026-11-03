@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verification · circuitEvolve</title>
+<meta name="description" content="Every candidate verified across 216 PVT corners, plus Monte Carlo mismatch and yield.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://sathvik-bharadwaj.github.io/circuitevolve-website/verification.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Verification · circuitEvolve">
+<meta property="og:description" content="Every candidate verified across 216 PVT corners, plus Monte Carlo mismatch and yield.">
+<meta property="og:url" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/verification.html">
+<meta property="og:image" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="preload" href="assets/jakarta.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="css/site.css">
+<script src="js/ce-sims.js" defer></script>
+<script src="assets/three.min.js" defer></script>
+<script src="js/scenes.js" defer></script>
+<script src="js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+  <nav class="navlinks" id="navlinks" aria-label="Main"><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html" aria-current="page">Verification</a><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Thesis</a><a class="m-only" href="contact.html">Contact</a><a class="m-only" href="demo.html">Try OPTIM ↗</a></nav>
+  <div class="nav-cta"><a class="btn ghost sm" href="contact.html">Contact</a><a class="btn sm" href="demo.html">Try OPTIM <span class="arr">↗</span></a></div>
+  <button class="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span></span></button>
+</div></header>
+<main id="main">
+<section class="phero">
+  <div class="wrap split">
+    <div class="stack">
+      <span class="eyebrow rise">Verification</span>
+      <h1 class="rise" style="--d:.1s;margin:0">Every corner <span class="grad">counts.</span></h1>
+      <p class="rise" style="--d:.2s">Process, temperature and supply. Each generation is swept through the full lattice of operating conditions, and a candidate only wins when every cell turns green.</p>
+      <div class="counter rise" style="--d:.3s">
+        <div class="row"><span>CORNERS PASSING</span><span>GEN <span data-hud="gen">00</span> / 12</span></div>
+        <div class="big"><b data-hud="pass">0</b><span>/ 216</span></div>
+        <div class="meter"><i data-hud="bar" style="--v:0"></i></div>
+      </div>
+      <div class="legend rise" style="--d:.38s"><span><i style="background:#4a4a4a"></i>failing</span><span><i style="background:#BDBDBD"></i>marginal</span><span><i style="background:#3D7BFF"></i>passing</span><span><i style="background:#FFFFFF"></i>passing with margin</span></div>
+    </div>
+    <div class="scene cube-scene" data-scene="cube" id="cube">
+      <span class="scene-label axis-label">PROCESS →</span><span class="scene-label axis-label">TEMPERATURE →</span><span class="scene-label axis-label">SUPPLY →</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="head">
+      <div data-reveal><span class="eyebrow"><span class="n">01</span> Beyond the typical case</span><h2>Explore boldly.<br>Verify thoroughly.</h2></div>
+      <p data-reveal style="--d:.08s">From corners to mismatch, behaviour across operating conditions becomes part of the conversation, not a surprise at signoff.</p>
+    </div>
+    <div class="grid2">
+      <article class="card simcard" data-reveal><div class="in"><span class="eyebrow">PVT heatmap</span><h3>216 corners, one view.</h3><p>Each sweep re-colours the grid by worst-metric margin, with the worst corner tracked.</p></div><div class="sim" data-ce-sim="corners" data-seed="5" data-speed=".85"></div></article>
+      <article class="card simcard" data-reveal style="--d:.08s"><div class="in"><span class="eyebrow">Monte Carlo &amp; yield</span><h3>Mismatch, before and after.</h3><p>Baseline and optimised phase-margin distributions against a 50–70° goal.</p></div><div class="sim" data-ce-sim="montecarlo" data-seed="21" data-speed=".85"></div></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec tight"><div class="wrap"><div class="cta" data-reveal>
+  <span class="eyebrow">Next</span><h2>The research behind the agents.</h2><p>NetGen, our MLCAD 2026 paper on failure-aware agents for analog netlist generation.</p>
+  <div class="actions"><a class="btn" href="research.html">Read about NetGen <span class="arr">↗</span></a><a class="btn ghost" href="demo.html">Try OPTIM <span class="arr">↗</span></a></div>
+</div></div></section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+        <p>AI for analog circuit design. Simulation-driven exploration, engineer-led decisions.</p>
+      </div>
+      <nav class="footer-col" aria-label="Platform"><h4>Platform</h4><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a href="demo.html">Interactive demo</a></nav>
+      <nav class="footer-col" aria-label="Company"><h4>Company</h4><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Our thesis</a><a href="contact.html">Contact</a></nav>
+    </div>
+    <div class="footer-bot">
+      <span>© <span data-year>2026</span> circuitEvolve</span>
+      <span class="footer-links"><a href="mailto:hello@circuitevolve.com">hello@circuitevolve.com</a><a href="https://www.linkedin.com/company/circuitevolve/" target="_blank" rel="noopener">LinkedIn ↗</a><a href="#main">Back to top ↑</a></span>
+    </div>
+  </div>
+</footer>
+<button class="motion-toggle" type="button" aria-pressed="false">Pause motion <span aria-hidden="true">Ⅱ</span></button>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetGen at MLCAD 2026 · circuitEvolve</title>
+<meta name="description" content="NetGen: Failure-Aware Orchestrator Agents for Analog Netlist Generation, presented at MLCAD 2026.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://sathvik-bharadwaj.github.io/circuitevolve-website/research.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NetGen at MLCAD 2026 · circuitEvolve">
+<meta property="og:description" content="NetGen: Failure-Aware Orchestrator Agents for Analog Netlist Generation, presented at MLCAD 2026.">
+<meta property="og:url" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/research.html">
+<meta property="og:image" content="https://sathvik-bharadwaj.github.io/circuitevolve-website/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="preload" href="assets/jakarta.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="css/site.css">
+<script src="js/ce-sims.js" defer></script>
+<script src="assets/three.min.js" defer></script>
+<script src="js/scenes.js" defer></script>
+<script src="js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+  <nav class="navlinks" id="navlinks" aria-label="Main"><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a href="research.html" aria-current="page">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Thesis</a><a class="m-only" href="contact.html">Contact</a><a class="m-only" href="demo.html">Try OPTIM ↗</a></nav>
+  <div class="nav-cta"><a class="btn ghost sm" href="contact.html">Contact</a><a class="btn sm" href="demo.html">Try OPTIM <span class="arr">↗</span></a></div>
+  <button class="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span></span></button>
+</div></header>
+<main id="main">
+<section class="phero" style="min-height:min(82vh,820px);display:flex;align-items:flex-end">
+  <div class="scene" data-scene="netgen" id="netgen-research" data-x="5" data-dist="14.5"></div>
+  <div class="wrap">
+    <span class="eyebrow rise">Research · MLCAD 2026</span>
+    <h1 class="rise" style="--d:.1s">NetGen: agents that <span class="grad">learn from failure.</span></h1>
+    <p class="rise" style="--d:.2s">Failure-Aware Orchestrator Agents for Analog Netlist Generation, presented by team circuitEvolve at the ACM/IEEE Symposium on Machine Learning for CAD.</p>
+    <div class="hud rise" style="--d:.3s;margin-top:28px" aria-hidden="true"><span class="hud-item">NETS ROUTED <b class="c" data-hud="built">0</b></span><span class="hud-item">FAILURES REPAIRED <b class="a" data-hud="fixed">0</b></span></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap split" style="align-items:start">
+    <div class="paper" data-reveal>
+      <span class="eyebrow">Paper</span>
+      <p class="title">NetGen: Failure-Aware Orchestrator Agents for Analog Netlist Generation</p>
+      <div class="people">
+        <div class="person"><b>Anish Mall</b><small>Politecnico di Milano / circuitEvolve</small></div>
+        <div class="person"><b>Dhruv Bhardwaj</b><small>BITS Pilani, K K Birla Goa Campus / circuitEvolve</small></div>
+        <div class="person"><b>Harsh Lakshakar</b><small>BITS Pilani, Pilani Campus / circuitEvolve</small></div>
+        <div class="person"><b>Ojas Pungalia</b><small>circuitEvolve</small></div>
+      </div>
+    </div>
+    <div class="stack" data-reveal style="--d:.08s">
+      <span class="eyebrow"><span class="n">01</span> Presentation</span>
+      <div class="facts">
+        <div><span>Venue</span><span>MLCAD 2026, ACM/IEEE International Symposium on Machine Learning for CAD</span></div>
+        <div><span>Session</span><span>Session 8: Analog Design &amp; Benchmarks</span></div>
+        <div><span>Date</span><span>Wednesday, 9 September 2026 · 11:10–12:30</span></div>
+        <div><span>Location</span><span>Parnas Hotel Jeju, South Korea</span></div>
+        <div><span>Sponsors</span><span>IEEE CEDA and ACM SIGDA</span></div>
+      </div>
+      <a class="tlink" href="https://mlcad.org/symposium/2026/program/" target="_blank" rel="noopener">View the conference program ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap">
+    <div class="head">
+      <div data-reveal><span class="eyebrow"><span class="n">02</span> Why it matters</span><h2>Beyond sizing, toward the whole analog flow.</h2></div>
+      <p data-reveal style="--d:.08s">NetGen extends the team's work from tuning an existing circuit to generating the circuit itself, with agents that treat a failed attempt as information rather than a dead end.</p>
+    </div>
+    <div class="grid3">
+      <div class="card" data-reveal><span class="ico">01</span><h3>Orchestrated</h3><p>Specialised agents coordinate on building an analog netlist.</p></div>
+      <div class="card" data-reveal style="--d:.06s"><span class="ico">02</span><h3>Failure-aware</h3><p>Failures are detected and fed back so later attempts route around them.</p></div>
+      <div class="card" data-reveal style="--d:.12s"><span class="ico">03</span><h3>Benchmarked</h3><p>Presented in MLCAD's Analog Design &amp; Benchmarks session.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec tight"><div class="wrap"><div class="cta" data-reveal>
+  <span class="eyebrow">Research collaboration</span><h2>Working on ML for analog design?</h2><p>We work with academic collaborators. Get in touch about the paper or future research.</p>
+  <div class="actions"><a class="btn" href="contact.html">Contact the team <span class="arr">↗</span></a><a class="btn ghost" href="news.html">Newsroom <span class="arr">↗</span></a></div>
+</div></div></section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="brand" href="index.html" aria-label="circuitEvolve home"><span class="mark"><img src="assets/ce-logo.png" alt=""></span>circuitEvolve</a>
+        <p>AI for analog circuit design. Simulation-driven exploration, engineer-led decisions.</p>
+      </div>
+      <nav class="footer-col" aria-label="Platform"><h4>Platform</h4><a href="optim.html">OPTIM</a><a href="how-it-works.html">How it works</a><a href="verification.html">Verification</a><a href="demo.html">Interactive demo</a></nav>
+      <nav class="footer-col" aria-label="Company"><h4>Company</h4><a href="research.html">Research</a><a href="news.html">Newsroom</a><a href="thesis.html">Our thesis</a><a href="contact.html">Contact</a></nav>
+    </div>
+    <div class="footer-bot">
+      <span>© <span data-year>2026</span> circuitEvolve</span>
+      <span class="footer-links"><a href="mailto:hello@circuitevolve.com">hello@circuitevolve.com</a><a href="https://www.linkedin.com/company/circuitevolve/" target="_blank" rel="noopener">LinkedIn ↗</a><a href="#main">Back to top ↑</a></span>
+    </div>
+  </div>
+</footer>
+<button class="motion-toggle" type="button" aria-pressed="false">Pause motion <span aria-hidden="true">Ⅱ</span></button>
+</body>
+</html>
